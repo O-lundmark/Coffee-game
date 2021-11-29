@@ -111,6 +111,7 @@ def game(strategies, rounds):
     unique_strategies, strategies_occurance = get_strategies(strategies)
     strategy_points = np.zeros(len(unique_strategies))
     print("unique_strategies: ", unique_strategies)
+    print("strategy_occurance: ", strategies_occurance)
     print("strategy_points: ", strategy_points)
 
     for i in range(len(unique_strategies)):
@@ -139,7 +140,7 @@ def game(strategies, rounds):
 
 def play_game(strategy1, strategy2, strategy1_history, strategy2_history, history_length1, history_length2):
 
-    if len(strategy2_history) < history_length1: # Om vi ej har fått tillräckligt många val av spelare två väljer vi att Cooperate
+    if len(strategy2_history) < history_length1 or len(strategy1_history) < history_length2:
         return 1, 1                              # Detta stämmer inte. Måste också kolla hur lång "history_length" strategi 2 har, då
                                                  # den kanske kan börja spela på sin strategi innan spelare ett gör det !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                                                  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -172,9 +173,12 @@ def get_points(strategy1_history, strategy2_history):
     return strategy1_points, strategy2_points
 
 
-strats = [[1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0], [1, 1]]
+strats = [[1, 1], [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0], [1, 0] ]
 game(strats, 10)
 
+# Det som inte funkar nu är om en strategi som är "kortare" än den andra är strategi 1, så kommer "history" inte att finns tillräcklig för
+# den långa strategin. Eftersom den kommer att kolla efter något med history som är kortare än den historyn den söker. Måste alltså ändra i
+# play_game så att den lägger till 1:or tills den som har längst history blir nöjd, just nu fyller den bara så att strategi 1 blir nöjd
 
 """
 alwaysC = [1, 1]
