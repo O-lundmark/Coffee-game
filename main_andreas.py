@@ -3,6 +3,7 @@ import math
 import numpy as np
 import copy
 from plotter import Plotter
+import matplotlib.pyplot as plt
 
 evolutionary_fitness = True
 
@@ -105,6 +106,8 @@ def get_strategies(strategies):
 # Hittade inte hur många gånger alla strategier ska möta varandra. Sätter det till 100 gånger för tillfället
 def game(strategies, rounds, generations):
     count = 0
+    fig, ax = plt.subplots(1, 2, figsize=(13, 9))
+    fig.tight_layout(pad=15.0)
     while count < generations:
         unique_strategies, strategies_occurance = get_strategies(strategies)
         # print("unique strategies for generation ", count + 1, ": ", unique_strategies)
@@ -177,9 +180,11 @@ def game(strategies, rounds, generations):
         count += 1
         #print("\n")
         if count % 100 == 0:
-            color.update(unique_strategies, strategies_fraction)
+            average = sum(average_score_i)/len(average_score_i)/rounds
+            color.update(unique_strategies, strategies_fraction, average, fig, ax)
             print(f"unique strategies:{unique_strategies}")
             print(f"fraction:{strategies_fraction}")
+            print(f"average score:{average}")
 
 
 def play_game(strategy1, strategy2, strategy1_history, strategy2_history, history_length1, history_length2):
