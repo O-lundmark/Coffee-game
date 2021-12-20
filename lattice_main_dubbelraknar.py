@@ -13,17 +13,17 @@ alwaysC = [1, 1]
 tft = [0, 1]
 reverseTft = [1, 0]
 alwaysD = [0, 0]
-# payoffMatrix = [[[0, 0], [2, 0]], [[0, 2], [1, 1]]] # För coffee game
-payoffMatrix = [[[1, 1], [5, 0]], [[0, 5], [3, 3]]]  # Prisoner's Dilemma, R = 1, S = 0, T = 1.7, P = 0.7
+payoffMatrix = [[[0, 0], [2, 1]], [[1, 2], [1, 1]]] # För coffee game
+#payoffMatrix = [[[1, 1], [5, 0]], [[0, 5], [3, 3]]]  # Prisoner's Dilemma, R = 1, S = 0, T = 1.7, P = 0.7
 #payoffMatrix = [[[1, 1], [0, 1.6]], [[1.6, 0], [0.3, 0.3]]]
 lattice_size = 32
 
-noise = 0.01
-rounds = 10
+noise = 0.001
+rounds = 20
 population = lattice_size*lattice_size
 
 generations = 10000
-max_memory = 1
+max_memory = 3
 pp = 0.002  # Chansen att "point mutation" för varje gen i varje genom
 pd = 0.001  # Chansen att "duplication" genom att kopiera samma genom och adderar den, alltså [0 1 1 0] -> [0 1 1 0 0 1 1 0]
 ps = 0.001  # Chansen att "split mutation", alltså dela den i två och väljer at random den första eller andra hälften
@@ -113,7 +113,7 @@ def game(strategies, rounds, generations):
     strategies_fraction = np.array(strategies_occurance) / sum(strategies_occurance)
     lattice.init_lattice_random(unique_strategies, strategies_fraction)
     lattice.plot_lattice(fig, ax, title_text=f'Generation{count}')
-    color.update(unique_strategies, strategies_fraction, fig, ax)
+    #color.update(unique_strategies, strategies_fraction, fig, ax, plot_every)
 
     while count < generations:
         # DEN DUBBELRÄKNAR MYCKET NU, FIXA DET eller??
@@ -156,12 +156,13 @@ def game(strategies, rounds, generations):
         lattice.lattice_matrix = lattice.updated_lattice
 
         # print("\n")
-        if count % 2 == 0:
+        plot_every = 5
+        if count % plot_every == 0:
             strategies_fraction, unique_strategies = lattice.get_strategy_fractions()
             lattice.plot_lattice(fig, ax, title_text=f'Generation {count}')
-            color.update(unique_strategies, strategies_fraction, fig, ax)
-            print(f"unique strategies:{unique_strategies}")
-            print(f"fraction:{strategies_fraction}")
+            color.update(unique_strategies, strategies_fraction, fig, ax, plot_every)
+            #print(f"unique strategies:{unique_strategies}")
+            #print(f"fraction:{strategies_fraction}")
 
 
 lattice = Lattice(lattice_size)

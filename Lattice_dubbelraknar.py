@@ -6,6 +6,9 @@ import random
 from functions import duplicate_genome, split_genome, point_mutation
 import copy
 import collections
+import seaborn as sns
+import matplotlib.colors as colors1
+import matplotlib.colors as cl
 
 
 class Plotter:
@@ -13,7 +16,7 @@ class Plotter:
         self.un = []
         self.unfracs = []
 
-    def update(self, unique, fraction, fig, ax):
+    def update(self, unique, fraction, fig, ax, plot_every):
         for strat in unique:
             if strat not in self.un:
                 self.un.append(strat)
@@ -28,12 +31,12 @@ class Plotter:
             else:
                 self.unfracs[i].append(0)
             x = list(range(1, len(self.unfracs[i]) + 1))
-            x = [h * 2 for h in x]
+            x = [h * plot_every for h in x]
             ax[1].plot(x, self.unfracs[i], label=strat)
         ax[1].set_xlabel("Generation")
         ax[1].set_ylabel("Fraction")
         ax[1].legend(bbox_to_anchor=(1, 1),
-                   loc='upper left', borderaxespad=0)
+                     loc='upper left', borderaxespad=0)
         plt.draw()
         plt.pause(0.000001)
 
@@ -61,6 +64,10 @@ class Lattice:
         self.max_value = 0
         self.all_coord = [(x, y) for x in range(lattice_size) for y in range(lattice_size)]
         self.updated_lattice = None
+        cmaps = plt.get_cmap('tab20c')
+        self.num_colors = 20
+        self.colors = [cmaps(i / self.num_colors) for i in range(0, self.num_colors)]
+        self.cmap = cl.LinearSegmentedColormap.from_list('', self.colors, self.num_colors)
 
     # initierar random, kanske vill göra någon annan som initerar på annat sätt?
     def init_lattice_random(self, unique_init_strategies, init_strategy_frac):
@@ -69,19 +76,22 @@ class Lattice:
         self.updated_lattice = self.lattice_matrix
         for i in range(len(unique_init_strategies)):
             self.dict_unique_strategies_values[f"{i}"] = unique_init_strategies[i]
-            self.max_value = i
+        self.max_value = len(unique_init_strategies) - 1
 
     def plot_lattice(self, fig, ax, title_text='lattice'):
         """ func som plottar upp spel-matrisen """
-        used_cmap = plt.cm.get_cmap('tab20')
-        ax[0].clear()
-        unique = np.unique(self.lattice_matrix)
-        colors = [used_cmap(value) for value in unique]
 
-        own_cmap = mcolor.ListedColormap(tuple(colors))
-        im = ax[0].imshow(self.lattice_matrix, interpolation='none', cmap=own_cmap)
-        patches = [mpatches.Patch(color=colors[i], label=f"{self.dict_unique_strategies_values.get(str(unique[i]))}") for i in
-                   range(len(unique))]
+        ax[0].clear()
+        frac, strat = self.get_strategy_fractions()
+        unique = np.unique(self.lattice_matrix)
+
+        sns.heatmap(self.lattice_matrix, ax=ax[0], cmap=self.cmap, vmin=0, vmax=self.num_colors, square=True,
+                    cbar=False)
+        print(self.max_value)
+
+        patches = [mpatches.Patch(color=self.colors[i], label=f"{self.dict_unique_strategies_values.get(str(i))}") for i
+                   in
+                   unique]
         ax[0].legend(handles=patches, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
         ax[0].set_title(title_text)
@@ -89,7 +99,7 @@ class Lattice:
         plt.pause(0.00001)
         return plt
 
-    #BYT TILL ROLL OM VI ORKAR, säkert snabbare. kopierade bara denna från annan kurs vi haft
+    # BYT TILL ROLL OM VI ORKAR, säkert snabbare. kopierade bara denna från annan kurs vi haft
     def neumann_neighbours(self, position):  # with periodic boundary conditiions
         x_position = position[0]
         y_position = position[1]
@@ -127,8 +137,9 @@ class Lattice:
             # om det muterats till någon ny finns strat finns den inte med i vår dict --> måste ge den nytt värde och
             # stoppa in i dict
             if possible_mutated_better_strategy not in self.dict_unique_strategies_values.values():
-                self.dict_unique_strategies_values[f'{self.max_value}'] = possible_mutated_better_strategy
                 self.max_value += 1
+                self.dict_unique_strategies_values[f'{self.max_value}'] = possible_mutated_better_strategy
+
             # om vår strategi har muterats så kommer ju också värdet som ska stoppas in i spel-matrisen ändras.
             # hittar den såhär xD
             if possible_mutated_better_strategy != better_strategy:
