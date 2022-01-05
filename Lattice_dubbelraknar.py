@@ -15,8 +15,16 @@ class Plotter:
     def __init__(self):
         self.un = []
         self.unfracs = []
+        cmaps = plt.get_cmap('tab20c')
+        cmaps2 = plt.get_cmap('tab20b')
+        cmaps3 = plt.get_cmap('Paired')
+        cmaps4 = plt.get_cmap('Set1')
+        self.num_colors = 20
+        self.colors = [cmaps(i / self.num_colors) for i in range(0, self.num_colors)] + \
+                      [cmaps2(i / self.num_colors) for i in range(0, self.num_colors)] + \
+                        [cmaps3(i / 12) for i in range(0, 12)] + [cmaps4(i / 50) for i in range(0, 50)]
 
-    def update(self, unique, fraction, fig, ax, plot_every):
+    def update(self, unique, fraction, fig, ax, plot_every, dict):
         for strat in unique:
             if strat not in self.un:
                 self.un.append(strat)
@@ -30,13 +38,22 @@ class Plotter:
                 self.unfracs[i].append(fraction[unique.index(strat)])
             else:
                 self.unfracs[i].append(0)
+            values_list = list(dict.values())
+            key_list = list(dict.keys())
+            pos = values_list.index(strat)
+            color_value = int(key_list[pos])
             x = list(range(1, len(self.unfracs[i]) + 1))
             x = [h * plot_every for h in x]
-            ax[1].plot(x, self.unfracs[i], label=strat)
-        ax[1].set_xlabel("Generation")
-        ax[1].set_ylabel("Fraction")
-        ax[1].legend(bbox_to_anchor=(1, 1),
-                     loc='upper left', borderaxespad=0)
+            if self.unfracs[i][-1]==0:
+                ax[1].plot(x, self.unfracs[i], label='_nolegend_', c=self.colors[color_value], linewidth=2.5)
+            else:
+                ax[1].plot(x, self.unfracs[i], label=strat, c=self.colors[color_value], linewidth=2.5)
+        ax[1].set_xlabel("Generation", fontsize=14, font="Times New Roman")
+        ax[1].set_ylabel("Fraction", fontsize=14, font="Times New Roman")
+
+        ax[1].set_ylim([-0.01, 1.01])
+        #ax[1].legend(bbox_to_anchor=(1, 1),
+        #             loc='best', borderaxespad=0)
         plt.draw()
         plt.pause(0.000001)
 
@@ -65,9 +82,14 @@ class Lattice:
         self.all_coord = [(x, y) for x in range(lattice_size) for y in range(lattice_size)]
         self.updated_lattice = None
         cmaps = plt.get_cmap('tab20c')
+        cmaps2 = plt.get_cmap('tab20b')
+        cmaps3 = plt.get_cmap('Paired')
+        cmaps4 = plt.get_cmap('Set1')
         self.num_colors = 20
-        self.colors = [cmaps(i / self.num_colors) for i in range(0, self.num_colors)]
-        self.cmap = cl.LinearSegmentedColormap.from_list('', self.colors, self.num_colors)
+        self.colors = [cmaps(i / self.num_colors) for i in range(0, self.num_colors)] + \
+                      [cmaps2(i / self.num_colors) for i in range(0, self.num_colors)] + \
+                        [cmaps3(i / 12) for i in range(0, 12)] + [cmaps4(i / 50) for i in range(0, 50)]
+        self.cmap = cl.LinearSegmentedColormap.from_list('', self.colors, self.num_colors*2+12+50)
 
     # initierar random, kanske vill göra någon annan som initerar på annat sätt?
     def init_lattice_random(self, unique_init_strategies, init_strategy_frac):
@@ -82,22 +104,23 @@ class Lattice:
         """ func som plottar upp spel-matrisen """
 
         ax[0].clear()
+
         frac, strat = self.get_strategy_fractions()
         unique = np.unique(self.lattice_matrix)
-
-        sns.heatmap(self.lattice_matrix, ax=ax[0], cmap=self.cmap, vmin=0, vmax=self.num_colors, square=True,
-                    cbar=False)
         print(self.max_value)
+        sns.heatmap(self.lattice_matrix, ax=ax[0], cmap=self.cmap, vmin=0, vmax=self.num_colors*2+12+50, square=True,
+                    cbar=False, yticklabels=False, xticklabels=False)
 
         patches = [mpatches.Patch(color=self.colors[i], label=f"{self.dict_unique_strategies_values.get(str(i))}") for i
                    in
                    unique]
-        ax[0].legend(handles=patches, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-
+        legends = ax[1].legend(handles=patches, loc=2, borderaxespad=0., bbox_to_anchor=(1.05, 1))
+        fig.tight_layout()
+        #plt.subplots_adjust(right=0.65)
         ax[0].set_title(title_text)
         plt.draw()
         plt.pause(0.00001)
-        return plt
+        return legends
 
     # BYT TILL ROLL OM VI ORKAR, säkert snabbare. kopierade bara denna från annan kurs vi haft
     def neumann_neighbours(self, position):  # with periodic boundary conditiions

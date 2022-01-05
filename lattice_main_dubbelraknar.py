@@ -13,19 +13,19 @@ alwaysC = [1, 1]
 tft = [0, 1]
 reverseTft = [1, 0]
 alwaysD = [0, 0]
-payoffMatrix = [[[0, 0], [2, 1]], [[1, 2], [1, 1]]] # För coffee game
+#payoffMatrix = [[[0, 0], [2, 1]], [[1, 2], [1, 1]]] # För coffee game
 #payoffMatrix = [[[1, 1], [5, 0]], [[0, 5], [3, 3]]]  # Prisoner's Dilemma, R = 1, S = 0, T = 1.7, P = 0.7
-#payoffMatrix = [[[1, 1], [0, 1.6]], [[1.6, 0], [0.3, 0.3]]]
+payoffMatrix = [[[0, 0], [5, 3]], [[3, 5], [3, 3]]] # För coffee game
 lattice_size = 32
 
 noise = 0.001
 rounds = 20
 population = lattice_size*lattice_size
 
-generations = 10000
-max_memory = 3
+generations = 15000
+max_memory = 4
 pp = 0.002  # Chansen att "point mutation" för varje gen i varje genom
-pd = 0.001  # Chansen att "duplication" genom att kopiera samma genom och adderar den, alltså [0 1 1 0] -> [0 1 1 0 0 1 1 0]
+pd = 0.001  # Chansen att "duplication" genom att kopiera samma genom och adderar den, allt     så [0 1 1 0] -> [0 1 1 0 0 1 1 0]
 ps = 0.001  # Chansen att "split mutation", alltså dela den i två och väljer at random den första eller andra hälften
 
 
@@ -107,12 +107,15 @@ def get_points(strategy1_history, strategy2_history):
 
 def game(strategies, rounds, generations):
     count = 0
-    fig, ax = plt.subplots(1, 2, figsize=(13,9))
-    fig.tight_layout(pad=15.0)
+    fig, ax = plt.subplots(1, 2, figsize=(15, 7))
+    fig.tight_layout(pad=8.0)
+    plt.rcParams['font.family'] = "Times New Roman"
+    plt.rcParams.update({'font.size': 16})
+    csfont = {'fontname': 'Times New Roman'}
     unique_strategies, strategies_occurance = get_strategies(strategies)
     strategies_fraction = np.array(strategies_occurance) / sum(strategies_occurance)
     lattice.init_lattice_random(unique_strategies, strategies_fraction)
-    lattice.plot_lattice(fig, ax, title_text=f'Generation{count}')
+    #lattice.plot_lattice(fig, ax, title_text=f'Generation{count}')
     #color.update(unique_strategies, strategies_fraction, fig, ax, plot_every)
 
     while count < generations:
@@ -156,13 +159,15 @@ def game(strategies, rounds, generations):
         lattice.lattice_matrix = lattice.updated_lattice
 
         # print("\n")
-        plot_every = 5
+        plot_every = 250
         if count % plot_every == 0:
             strategies_fraction, unique_strategies = lattice.get_strategy_fractions()
-            lattice.plot_lattice(fig, ax, title_text=f'Generation {count}')
-            color.update(unique_strategies, strategies_fraction, fig, ax, plot_every)
-            #print(f"unique strategies:{unique_strategies}")
-            #print(f"fraction:{strategies_fraction}")
+            color.update(unique_strategies, strategies_fraction, fig, ax, plot_every, lattice.dict_unique_strategies_values)
+            legends = lattice.plot_lattice(fig, ax, title_text=f'Generation {count}')
+            plt.savefig(f'lattice_plots/coffe_test2/plot_{count}.eps', format='eps', bbox_inches='tight')
+            for k in range(len(legends.texts)):
+                legends.texts[k].set_visible(False)  # disable label
+                legends.legendHandles[k].set_visible(False)
 
 
 lattice = Lattice(lattice_size)
