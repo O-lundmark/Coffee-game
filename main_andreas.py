@@ -12,18 +12,20 @@ tft = [0, 1]
 reverseTft = [1, 0]
 alwaysD = [0, 0]
 
-#payoffMatrix = [[[0, 0], [5, 3]], [[3, 5], [3, 3]]] # För coffee game
-payoffMatrix = [[[1, 1], [5, 0]], [[0, 5], [3, 3]]] # Prisoner's Dilemma
+payoffMatrix = [[[0,0], [5, 3]], [[3, 5], [3, 3]]] # För coffee game
+#payoffMatrix = [[[1, 1], [5, 0]], [[0, 5], [3, 3]]] # Prisoner's Dilemma
 #payoffMatrix = [[[0, 0], [2, 1]], [[1, 2], [1, 1]]]
-noise = 0.00025
-rounds = 100
+noise = 0.000
+rounds = 50
 population = 1000
 generations = 10000
 max_memory = 4
 growth_rate = 0.1
-pp = 0.002  # Chansen att "point mutation" för varje gen i varje genom
+pp = 0.001  # Chansen att "point mutation" för varje gen i varje genom
 pd = 0.0001  # Chansen att "duplication" genom att kopiera samma genom och adderar den, alltså [0 1 1 0] -> [0 1 1 0 0 1 1 0]
-ps = 0.0001  # Chansen att "split mutation", alltså dela den i två och väljer at random den första eller andra hälften
+ps = 0.0001 # Chansen att "split mutation", alltså dela den i två och väljer at random den första eller andra hälften
+
+counter=50
 
 strategies = int(population / 4) * [alwaysC] + int(population / 4) * [alwaysD] + int(population / 4) * [tft] + int(population / 4) * [reverseTft]
 #strategies = [alwaysC] + [alwaysD]
@@ -183,9 +185,9 @@ def game(strategies, rounds, generations):
         strategies = get_new_strategies(average_score_i, strategies_fraction, unique_strategies)
         count += 1
         #print("\n")
-        if count % 100 == 0:
+        if count % counter == 0:
             average = sum(average_score_i)/len(average_score_i)/rounds
-            color.update(unique_strategies, strategies_fraction, average, fig, ax)
+            color.update(unique_strategies, strategies_fraction, average, fig, ax, counter)
             plt.savefig(f'GA_coffe_game/GA_coffe_plot_{count}.eps', format='eps',  bbox_inches='tight')
             print(f"unique strategies:{unique_strategies}")
             print(f"fraction:{strategies_fraction}")
