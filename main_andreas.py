@@ -11,18 +11,19 @@ alwaysC = [1, 1]
 tft = [0, 1]
 reverseTft = [1, 0]
 alwaysD = [0, 0]
-# payoffMatrix = [[[0, 0], [2, 0]], [[0, 2], [1, 1]]] # För coffee game
-payoffMatrix = [[[1, 1], [5, 0]], [[0, 5], [3, 3]]] # Prisoner's Dilemma
 
-noise = 0.0001
+#payoffMatrix = [[[0, 0], [5, 3]], [[3, 5], [3, 3]]] # För coffee game
+payoffMatrix = [[[1, 1], [5, 0]], [[0, 5], [3, 3]]] # Prisoner's Dilemma
+#payoffMatrix = [[[0, 0], [2, 1]], [[1, 2], [1, 1]]]
+noise = 0.00025
 rounds = 100
 population = 1000
 generations = 10000
 max_memory = 4
 growth_rate = 0.1
-pp = 0.00002  # Chansen att "point mutation" för varje gen i varje genom
-pd = 0.00001  # Chansen att "duplication" genom att kopiera samma genom och adderar den, alltså [0 1 1 0] -> [0 1 1 0 0 1 1 0]
-ps = 0.00001  # Chansen att "split mutation", alltså dela den i två och väljer at random den första eller andra hälften
+pp = 0.002  # Chansen att "point mutation" för varje gen i varje genom
+pd = 0.0001  # Chansen att "duplication" genom att kopiera samma genom och adderar den, alltså [0 1 1 0] -> [0 1 1 0 0 1 1 0]
+ps = 0.0001  # Chansen att "split mutation", alltså dela den i två och väljer at random den första eller andra hälften
 
 strategies = int(population / 4) * [alwaysC] + int(population / 4) * [alwaysD] + int(population / 4) * [tft] + int(population / 4) * [reverseTft]
 #strategies = [alwaysC] + [alwaysD]
@@ -106,8 +107,11 @@ def get_strategies(strategies):
 # Hittade inte hur många gånger alla strategier ska möta varandra. Sätter det till 100 gånger för tillfället
 def game(strategies, rounds, generations):
     count = 0
-    fig, ax = plt.subplots(1, 2, figsize=(13, 9))
-    fig.tight_layout(pad=15.0)
+    fig, ax = plt.subplots(1, 2, figsize=(15, 7))
+    fig.tight_layout(pad=5.0)
+    plt.rcParams['font.family'] = "Times New Roman"
+    plt.rcParams.update({'font.size': 15})
+    csfont = {'fontname': 'Times New Roman'}
     while count < generations:
         unique_strategies, strategies_occurance = get_strategies(strategies)
         # print("unique strategies for generation ", count + 1, ": ", unique_strategies)
@@ -182,6 +186,7 @@ def game(strategies, rounds, generations):
         if count % 100 == 0:
             average = sum(average_score_i)/len(average_score_i)/rounds
             color.update(unique_strategies, strategies_fraction, average, fig, ax)
+            plt.savefig(f'GA_coffe_game/GA_coffe_plot_{count}.eps', format='eps',  bbox_inches='tight')
             print(f"unique strategies:{unique_strategies}")
             print(f"fraction:{strategies_fraction}")
             print(f"average score:{average}")

@@ -28,12 +28,16 @@ class Plotter:
                 self.unfracs[i].append(0)
             x=list(range(1, len(self.unfracs[i]) + 1))
             x = [h*100 for h in x]
-            ax[1].plot(x , self.unfracs[i], label=strat)
+            if self.unfracs[i][-1]==0:
+                ax[1].plot(x, self.unfracs[i], label='_nolegend_', linewidth=2.5)
+            else:
+                ax[1].plot(x, self.unfracs[i], label=strat, linewidth=2.5)
         ax[1].set_xlabel("Generation")
         ax[1].set_ylabel("Fraction")
-        ax[1].legend(bbox_to_anchor=(1, 1),
-                         loc='upper left', borderaxespad=0)
-        ax[0].plot(x, self.av)
+        ax[1].legend(#bbox_to_anchor=(0, 1),
+                         loc='best', borderaxespad=0)
+
+        ax[0].plot(x, self.av, linewidth=2.5)
         ax[0].set_xlabel("Generation")
         ax[0].set_ylabel("Average Score")
         plt.draw()
